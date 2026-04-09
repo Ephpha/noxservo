@@ -35,10 +35,13 @@ export default function Results() {
     ])
       .then(([answerData, searchData]) => {
         setAnswer(answerData)
-        setResults(searchData.results || [])
+        const resultList = searchData.results || []
+        setResults(resultList)
+        // No AI answer available — auto-expand sources so the page isn't empty
+        if (!answerData) setExpanded(true)
       })
       .catch(() => {
-        setAnswer({ text: 'Something went wrong. Please try again.' })
+        setAnswer(null)
         setResults([])
       })
       .finally(() => setLoading(false))

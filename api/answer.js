@@ -11,13 +11,6 @@
  */
 
 const MOCK_ANSWERS = {
-  default: {
-    text: 'This is a placeholder answer. Once the AI backend is connected, a concise, accurate response will appear here based on your query and the top search results.',
-    source: {
-      url: 'https://en.wikipedia.org',
-      domain: 'en.wikipedia.org',
-    },
-  },
   'quantum computing': {
     text: 'Quantum computing uses quantum mechanical phenomena — superposition and entanglement — to process information in ways classical computers cannot. A quantum bit (qubit) can exist in multiple states simultaneously, enabling certain calculations to run exponentially faster than on traditional hardware.',
     source: {
@@ -51,7 +44,7 @@ async function fetchAnswer(query) {
   const key = Object.keys(MOCK_ANSWERS).find((k) =>
     query.toLowerCase().includes(k)
   )
-  return MOCK_ANSWERS[key] || MOCK_ANSWERS['default']
+  return MOCK_ANSWERS[key] || null
 }
 
 export default async function handler(req, res) {
