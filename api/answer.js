@@ -1,7 +1,7 @@
 /**
  * /api/answer
- * Generates a concise AI answer via Claude Haiku.
- * Env var: ANTHROPIC_API_KEY (set in Vercel dashboard)
+ * Fetches search results from Tavily, then generates a grounded answer via Claude Haiku.
+ * Env vars: ANTHROPIC_API_KEY, TAVILY_API_KEY
  */
 
 import Anthropic from '@anthropic-ai/sdk'
@@ -13,11 +13,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing query parameter: q' })
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' })
+  if (!process.env.ANTHROPIC_API_KEY || !process.env.TAVILY_API_KEY) {
+    return res.status(500).json({ error: 'API keys not configured' })
   }
 
   try {
+    // Fetch search results to ground the answer
+    const tavilyRes = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: process.env.TAVILY_API_KEY,
+        query,
+        search_depth: 'basic',
+        max_results: 3,
+        include_answer: false,
+      }),
+    })
+
+    const tavilyData = tavilyRes.ok ? await tavilyRes.json() : { results: [] }
+    const snippets = (tavilyData.results || [])
+      .map((r, i) => `[${i + 1}] ${r.title}: ${r.content?.substring(0, 300) || ''}`)
+      .join('\n\n')
+
+    const context = snippets
+      ? `Here are web search results for context:\n\n${snippets}\n\n`
+      : ''
+
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
     const message = await client.messages.create({
@@ -26,7 +48,7 @@ export default async function handler(req, res) {
       messages: [
         {
           role: 'user',
-          content: `Answer this search query in 2-3 sentences. Be factual, direct, and concise. Do not use filler phrases like "Great question" or "Certainly". Do not start with "I". Just answer.
+          content: `${context}Answer this search query in 2-3 sentences based on the search results above. Be factual and accurate. If the search results don't contain relevant info, say so briefly. Do not use filler phrases. Do not start with "I". Just answer.
 
 Query: ${query}`,
         },
@@ -43,7 +65,6 @@ Query: ${query}`,
     )
   } catch (err) {
     console.error('[api/answer] error:', err)
-    // Return null so the UI falls back to sources-only gracefully
     return res.status(200).json(null)
   }
 }
