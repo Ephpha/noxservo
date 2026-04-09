@@ -34,9 +34,13 @@ Query: ${query}`,
     })
 
     const text = message.content?.[0]?.text?.trim() || null
+    const inputTokens = message.usage?.input_tokens || 0
+    const outputTokens = message.usage?.output_tokens || 0
 
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
-    return res.status(200).json(text ? { text, source: null } : null)
+    return res.status(200).json(
+      text ? { text, source: null, tokens: { input: inputTokens, output: outputTokens } } : null
+    )
   } catch (err) {
     console.error('[api/answer] error:', err)
     // Return null so the UI falls back to sources-only gracefully

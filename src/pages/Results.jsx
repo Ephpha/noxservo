@@ -12,7 +12,7 @@ export default function Results() {
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
-  const [energyWh] = useState(() => (0.25 + Math.random() * 0.15).toFixed(2))
+  const [energyWh, setEnergyWh] = useState(null)
 
   useEffect(() => {
     if (query) {
@@ -27,6 +27,7 @@ export default function Results() {
     setExpanded(false)
     setAnswer(null)
     setResults([])
+    setEnergyWh(null)
 
     // Fetch answer and search results in parallel
     Promise.all([
@@ -39,6 +40,21 @@ export default function Results() {
         setResults(resultList)
         // No AI answer available — auto-expand sources so the page isn't empty
         if (!answerData) setExpanded(true)
+
+        // Calculate real energy: ~0.15 Wh for search + Claude tokens
+        const tokens = answerData?.tokens
+        const wh = tokens
+          ? 0.15 + ((tokens.input + tokens.output) * 0.002) / 1000
+          : 0.15
+        const whRounded = parseFloat(wh.toFixed(3))
+        setEnergyWh(whRounded)
+
+        // Report to community stats (fire-and-forget)
+        fetch('/api/stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wh: whRounded }),
+        }).catch(() => {})
       })
       .catch(() => {
         setAnswer(null)
@@ -106,9 +122,11 @@ export default function Results() {
             )}
 
             {/* Energy note */}
-            <p className="text-[#272727] text-xs tracking-widest mt-12">
-              this search used ~{energyWh} Wh
-            </p>
+            {energyWh !== null && (
+              <p className="text-[#272727] text-xs tracking-widest mt-12">
+                this search used ~{energyWh} Wh
+              </p>
+            )}
           </>
         )}
 
