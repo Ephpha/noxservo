@@ -29,7 +29,7 @@ export default function EnergyCounter() {
 
   return (
     <p className="text-[#3d3d3d] text-xs tracking-widest mt-6 tabular-nums">
-      {stats.searches.toLocaleString('en-US')} searches &middot; {display} saved vs Google
+      {stats.searches.toLocaleString('en-US')} searches &middot; {display} saved vs Big Search
     </p>
   )
 }
