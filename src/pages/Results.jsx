@@ -1,8 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import SearchBar from '../components/SearchBar.jsx'
 import TopAnswer from '../components/TopAnswer.jsx'
 import SourceResults from '../components/SourceResults.jsx'
+
+const LOADING_MSGS = [
+  'querying the void...',
+  'decrypting the web...',
+  'whispering to the servers...',
+  'shushing the internet...',
+  'asking nicely...',
+  'tiptoeing through the data...',
+  'consulting the oracle...',
+  'mining for signal...',
+  'bothering a satellite...',
+  'translating human curiosity...',
+]
 
 export default function Results() {
   const [searchParams] = useSearchParams()
@@ -13,6 +26,8 @@ export default function Results() {
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
   const [energyWh, setEnergyWh] = useState(null)
+  const [loadingMsg, setLoadingMsg] = useState('')
+  const msgInterval = useRef(null)
 
   useEffect(() => {
     if (query) {
@@ -28,6 +43,12 @@ export default function Results() {
     setAnswer(null)
     setResults([])
     setEnergyWh(null)
+
+    // Cycle through loading messages
+    const pick = () => LOADING_MSGS[Math.floor(Math.random() * LOADING_MSGS.length)]
+    setLoadingMsg(pick())
+    msgInterval.current = setInterval(() => setLoadingMsg(pick()), 1800)
+
 
     // Fetch answer and search results in parallel
     Promise.all([
@@ -60,7 +81,10 @@ export default function Results() {
         setAnswer(null)
         setResults([])
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        clearInterval(msgInterval.current)
+        setLoading(false)
+      })
   }, [query])
 
   return (
@@ -86,9 +110,11 @@ export default function Results() {
       <main className="max-w-2xl mx-auto px-4 py-10">
 
         {loading ? (
-          <div className="flex flex-col gap-3 animate-pulse">
-            <div className="h-2 w-16 bg-[#1a1a1a] rounded" />
-            <div className="h-24 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg" />
+          <div className="flex flex-col gap-3">
+            <p className="text-[#3a3a3a] text-xs tracking-widest font-mono transition-all duration-500">
+              {loadingMsg}
+            </p>
+            <div className="h-24 bg-[#0a0a0a] border border-[#1a1a1a] rounded-lg animate-pulse" />
           </div>
         ) : (
           <>

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import SearchBar from '../components/SearchBar.jsx'
 import EnergyCounter from '../components/EnergyCounter.jsx'
 
@@ -23,6 +24,14 @@ export default function Landing() {
 
         {/* Energy counter */}
         <EnergyCounter />
+
+        {/* About link */}
+        <Link
+          to="/about"
+          className="text-[#272727] text-xs tracking-widest mt-4 hover:text-[#3d3d3d] transition-colors duration-200"
+        >
+          about
+        </Link>
 
       </div>
     </div>
