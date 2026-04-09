@@ -19,7 +19,7 @@ export default function SearchBar({ initialValue = '', compact = false }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="search quietly"
+          placeholder="shhh. searching."
           autoComplete="off"
           spellCheck="false"
           className={`

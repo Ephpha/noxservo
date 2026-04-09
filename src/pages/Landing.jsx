@@ -13,7 +13,7 @@ export default function Landing() {
 
         {/* Tagline */}
         <p className="text-[#2e2e2e] text-xs tracking-widest mt-3 mb-10">
-          the search engine that wastes nothing
+          search quietly.
         </p>
 
         {/* Search */}
