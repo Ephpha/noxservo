@@ -19,12 +19,17 @@ export default function EnergyCounter() {
     return () => clearInterval(interval)
   }, [])
 
-  if (stats === null) return null
+  if (stats === null || stats.searches === 0) return null
+
+  // Google avg ~0.3 Wh/search, Noxservo actual stored in total_wh
+  const savedWh = (stats.searches * 0.3) - stats.totalWh
+  const display = savedWh >= 1000
+    ? (savedWh / 1000).toFixed(3) + ' kWh'
+    : savedWh.toFixed(2) + ' Wh'
 
   return (
     <p className="text-[#3d3d3d] text-xs tracking-widest mt-6 tabular-nums">
-      {stats.searches.toLocaleString('en-US')} searches &middot;{' '}
-      {stats.totalKwh.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kWh used by our community
+      {stats.searches.toLocaleString('en-US')} searches &middot; {display} saved vs Google
     </p>
   )
 }
