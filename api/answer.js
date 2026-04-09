@@ -1,51 +1,10 @@
 /**
  * /api/answer
- *
- * Returns an AI-generated answer for the given query.
- * Currently returns mock data. Replace the body of `fetchAnswer`
- * with your real AI provider call (e.g. Claude API, OpenAI) once ready.
- *
- * Environment variables (set in Vercel dashboard, never in client bundle):
- *   ANTHROPIC_API_KEY  — for Claude API
- *   OPENAI_API_KEY     — alternative
+ * Generates a concise AI answer via Claude Haiku.
+ * Env var: ANTHROPIC_API_KEY (set in Vercel dashboard)
  */
 
-const MOCK_ANSWERS = {
-  'quantum computing': {
-    text: 'Quantum computing uses quantum mechanical phenomena — superposition and entanglement — to process information in ways classical computers cannot. A quantum bit (qubit) can exist in multiple states simultaneously, enabling certain calculations to run exponentially faster than on traditional hardware.',
-    source: {
-      url: 'https://en.wikipedia.org/wiki/Quantum_computing',
-      domain: 'en.wikipedia.org',
-    },
-  },
-  'climate change': {
-    text: 'Climate change refers to long-term shifts in global temperatures and weather patterns, primarily driven since the mid-20th century by human activities — chiefly the burning of fossil fuels. The resulting greenhouse gas emissions trap heat in the atmosphere, raising average global temperatures.',
-    source: {
-      url: 'https://climate.nasa.gov',
-      domain: 'climate.nasa.gov',
-    },
-  },
-}
-
-async function fetchAnswer(query) {
-  // --- REPLACE THIS SECTION with real AI API call ---
-  // Example using Claude API (server-side only):
-  //
-  // const Anthropic = require('@anthropic-ai/sdk')
-  // const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  // const message = await client.messages.create({
-  //   model: 'claude-sonnet-4-6',
-  //   max_tokens: 300,
-  //   messages: [{ role: 'user', content: `Answer concisely in 2-3 sentences: ${query}` }]
-  // })
-  // return { text: message.content[0].text, source: null }
-  // --------------------------------------------------
-
-  const key = Object.keys(MOCK_ANSWERS).find((k) =>
-    query.toLowerCase().includes(k)
-  )
-  return MOCK_ANSWERS[key] || null
-}
+import Anthropic from '@anthropic-ai/sdk'
 
 export default async function handler(req, res) {
   const query = req.query?.q || ''
@@ -54,12 +13,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing query parameter: q' })
   }
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' })
+  }
+
   try {
-    const answer = await fetchAnswer(query)
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300')
-    return res.status(200).json(answer)
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 200,
+      messages: [
+        {
+          role: 'user',
+          content: `Answer this search query in 2-3 sentences. Be factual, direct, and concise. Do not use filler phrases like "Great question" or "Certainly". Do not start with "I". Just answer.
+
+Query: ${query}`,
+        },
+      ],
+    })
+
+    const text = message.content?.[0]?.text?.trim() || null
+
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
+    return res.status(200).json(text ? { text, source: null } : null)
   } catch (err) {
     console.error('[api/answer] error:', err)
-    return res.status(500).json({ error: 'Failed to generate answer' })
+    // Return null so the UI falls back to sources-only gracefully
+    return res.status(200).json(null)
   }
 }
