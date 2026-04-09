@@ -42,7 +42,7 @@ export default async function handler(req, res) {
         redis.get('total_wh'),
       ])
 
-      res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+      res.setHeader('Cache-Control', 'no-store')
       return res.status(200).json({
         searches: Number(searches) || 0,
         totalWh: parseFloat(totalWh) || 0,
