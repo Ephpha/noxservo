@@ -15,6 +15,13 @@ export default function Results() {
   const [energyWh] = useState(() => (0.25 + Math.random() * 0.15).toFixed(2))
 
   useEffect(() => {
+    if (query) {
+      document.title = `${query} — Noxservo`
+    }
+    return () => { document.title = 'Noxservo' }
+  }, [query])
+
+  useEffect(() => {
     if (!query) return
     setLoading(true)
     setExpanded(false)

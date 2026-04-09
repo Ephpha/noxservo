@@ -52,3 +52,13 @@ body {
   outline: none;
   box-shadow: 0 0 0 1px rgba(212, 168, 83, 0.5), 0 0 24px rgba(212, 168, 83, 0.12);
 }
+
+/* Prevent browser autofill from overriding the dark theme */
+.search-input:-webkit-autofill,
+.search-input:-webkit-autofill:hover,
+.search-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e5e5e5;
+  -webkit-box-shadow: 0 0 0 1000px #000000 inset;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #D4A853;
+}
