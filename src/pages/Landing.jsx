@@ -7,11 +7,8 @@ export default function Landing() {
       <div className="w-full max-w-xl flex flex-col items-center animate-fade-in">
 
         {/* Wordmark */}
-        <h1
-          className="text-3xl font-semibold tracking-[0.25em] uppercase"
-          style={{ color: '#D4A853', letterSpacing: '0.3em' }}
-        >
-          Noxservo
+        <h1 className="pixel-logo text-2xl mb-1">
+          NOXSERVO
         </h1>
 
         {/* Tagline */}

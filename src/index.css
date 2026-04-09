@@ -47,6 +47,33 @@ body {
   background: #3a3a3a;
 }
 
+/* 8-bit pixel wordmark */
+.pixel-logo {
+  font-family: 'Press Start 2P', monospace;
+  color: #c8c8c8;
+  text-shadow:
+    2px 2px 0px #444,
+    -1px -1px 0px #1a1a1a,
+    0 0 20px rgba(200, 200, 200, 0.08);
+  image-rendering: pixelated;
+  letter-spacing: 0.15em;
+  position: relative;
+}
+
+.pixel-logo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  pointer-events: none;
+}
+
 /* Search input glow on focus */
 .search-input:focus {
   outline: none;

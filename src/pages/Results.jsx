@@ -71,10 +71,10 @@ export default function Results() {
         <div className="max-w-2xl mx-auto flex items-center gap-5">
           <Link
             to="/"
-            className="text-sm font-semibold tracking-[0.2em] uppercase shrink-0"
-            style={{ color: '#D4A853' }}
+            className="pixel-logo shrink-0"
+            style={{ fontSize: '0.6rem' }}
           >
-            Noxservo
+            NOXSERVO
           </Link>
           <div className="flex-1 max-w-lg">
             <SearchBar initialValue={query} compact />
